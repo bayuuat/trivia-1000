@@ -8,17 +8,12 @@ import GoogleLoginButton from "@/components/google-login";
 import { SubmitButton } from "@/components/submit-button";
 import { signInAction } from "@/app/actions";
 
-export default async function LoginForm({
-	searchParams,
-	className,
-	...props
-}: {
-	searchParams: Promise<Message>;
-	className?: string;
-} & React.ComponentPropsWithoutRef<"div">) {
-	const params = await searchParams;
+export default async function LoginForm(props: {
+  searchParams: Promise<Message>;
+}) {
+	const searchParams = await props.searchParams;
 	return (
-		<div className={cn("flex flex-col gap-6", className)} {...props}>
+		<div className="flex flex-col gap-6">
 			<Card>
 				<CardHeader>
 					<CardTitle className='text-2xl'>Login</CardTitle>
@@ -40,7 +35,7 @@ export default async function LoginForm({
 								</div>
 								<Input id='password' type='password' required />
 							</div>
-							<FormMessage message={params} />
+							<FormMessage message={searchParams} />
 							<SubmitButton formAction={signInAction} pendingText='Signing up...'>
 								Sign in
 							</SubmitButton>

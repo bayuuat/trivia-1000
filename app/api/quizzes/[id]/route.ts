@@ -26,10 +26,10 @@ const supabase = createClient();
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   try {
-    const { id } = params;
+    const { params } =  context;
 
     const { data: quiz, error: quizError } = await supabase
       .from('quizzes')
@@ -42,7 +42,7 @@ export async function GET(
           )
         )
       `)
-      .eq('id', id)
+      .eq('id', params.id)
       .single();
 
     if (quizError) {
