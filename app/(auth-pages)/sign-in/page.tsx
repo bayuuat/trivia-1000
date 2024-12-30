@@ -1,44 +1,60 @@
-import { signInAction } from "@/app/actions";
-import { FormMessage, Message } from "@/components/form-message";
-import { SubmitButton } from "@/components/submit-button";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Link from "next/link";
+import { FormMessage, Message } from "@/components/form-message";
+import GoogleLoginButton from "@/components/google-login";
+import { SubmitButton } from "@/components/submit-button";
+import { signInAction } from "@/app/actions";
 
-export default async function Login(props: { searchParams: Promise<Message> }) {
-  const searchParams = await props.searchParams;
-  return (
-    <form className="flex-1 flex flex-col min-w-64">
-      <h1 className="text-2xl font-medium">Sign in</h1>
-      <p className="text-sm text-foreground">
-        Don't have an account?{" "}
-        <Link className="text-foreground font-medium underline" href="/sign-up">
-          Sign up
-        </Link>
-      </p>
-      <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
-        <Label htmlFor="email">Email</Label>
-        <Input name="email" placeholder="you@example.com" required />
-        <div className="flex justify-between items-center">
-          <Label htmlFor="password">Password</Label>
-          <Link
-            className="text-xs text-foreground underline"
-            href="/forgot-password"
-          >
-            Forgot Password?
-          </Link>
-        </div>
-        <Input
-          type="password"
-          name="password"
-          placeholder="Your password"
-          required
-        />
-        <SubmitButton pendingText="Signing In..." formAction={signInAction}>
-          Sign in
-        </SubmitButton>
-        <FormMessage message={searchParams} />
-      </div>
-    </form>
-  );
+export default async function LoginForm({
+	searchParams,
+	className,
+	...props
+}: {
+	searchParams: Promise<Message>;
+	className?: string;
+} & React.ComponentPropsWithoutRef<"div">) {
+	const params = await searchParams;
+	return (
+		<div className={cn("flex flex-col gap-6", className)} {...props}>
+			<Card>
+				<CardHeader>
+					<CardTitle className='text-2xl'>Login</CardTitle>
+					<CardDescription>Enter your email below to login to your account</CardDescription>
+				</CardHeader>
+				<CardContent>
+					<form>
+						<div className='flex flex-col gap-6'>
+							<div className='grid gap-2'>
+								<Label htmlFor='email'>Email</Label>
+								<Input id='email' type='email' placeholder='m@example.com' required />
+							</div>
+							<div className='grid gap-2'>
+								<div className='flex items-center'>
+									<Label htmlFor='password'>Password</Label>
+									<a href='#' className='ml-auto inline-block text-sm underline-offset-4 hover:underline'>
+										Forgot your password?
+									</a>
+								</div>
+								<Input id='password' type='password' required />
+							</div>
+							<FormMessage message={params} />
+							<SubmitButton formAction={signInAction} pendingText='Signing up...'>
+								Sign in
+							</SubmitButton>
+							<GoogleLoginButton />
+						</div>
+						<div className='mt-4 text-center text-sm'>
+							Don&apos;t have an account?{" "}
+							<a href='sign-up' className='underline underline-offset-4'>
+								Sign up
+							</a>
+						</div>
+					</form>
+				</CardContent>
+			</Card>
+		</div>
+	);
 }

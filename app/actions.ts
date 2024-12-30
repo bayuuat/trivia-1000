@@ -53,8 +53,28 @@ export const signInAction = async (formData: FormData) => {
     return encodedRedirect("error", "/sign-in", error.message);
   }
 
-  return redirect("/protected");
+  return redirect("/quizzes");
 };
+
+export const handleGoogleSignIn = async () => {
+  const supabase = await createClient();
+  const header = await headers();
+  const origin = header.get('origin');
+
+
+  const { error, data } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: `${origin}/auth/callback`
+    }
+  })
+
+  if (error) {
+    console.log(error);
+  } else {
+    return redirect(data.url);
+  }
+}
 
 export const forgotPasswordAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
@@ -131,4 +151,47 @@ export const signOutAction = async () => {
   const supabase = await createClient();
   await supabase.auth.signOut();
   return redirect("/sign-in");
+};
+
+export const getUserQuizzes = async () => {
+  const supabase = await createClient();
+
+  try {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError) {
+      console.error("Failed to fetch user:", userError.message);
+      return { error: "Failed to fetch user" };
+    }
+
+    if (!user) {
+      console.log("User not authenticated");
+      return { error: "User not authenticated" };
+    }
+
+    const { data: quizzes, error: quizzesError } = await supabase
+      .from("quizzes")
+      .select(
+        `
+        *,
+        questions (
+          id
+        )
+      `
+      )
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+
+    if (quizzesError) {
+      console.error("Failed to fetch quizzes:", quizzesError.message);
+      return { error: "Failed to fetch quizzes" };
+    }
+
+    return { quizzes };
+  } catch (error) {
+    return { error: "An unexpected error occurred" };
+  }
 };
